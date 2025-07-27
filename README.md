@@ -64,12 +64,11 @@ To explain the risk computation in a simple, business-friendly way:
 
 ```python
 final_risk_score = (
-    + 85 * gas_std
-    - 99 * unique_to_ratio
-    - 70 * fncount_approve_ratio
-    - 3.4 * fn_entropy
-    + 18 * gas_mean
-    - 29 * tx_gap_std
+    + 4.56 * gas_std
+    - 3 * unique_to_ratio
+    - 1.9 * fncount_approve_ratio
+    - 1.15 * fn_entropy
+    + 1.2 * fncount_borrow_ratio
 )
 ```
 

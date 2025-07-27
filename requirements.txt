@@ -3,3 +3,6 @@ requests
 tqdm
 scipy
 python-dotenv
+ipykernel
+scikit-learn
+xgboost
