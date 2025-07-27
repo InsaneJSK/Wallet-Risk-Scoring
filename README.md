@@ -12,11 +12,30 @@ We adopted a hybrid **unsupervised → interpretable** pipeline to score DeFi wa
 
 ### Step 1: Data Parsing & Cleaning
 
+- Data collection done by fetching queries from TheGraph's enpoint for compound V2
+- Relied on Etherscan API key, (replace it in .env for reproducibility of results)
 - Parsed nested JSON transaction data for 100 wallet addresses.
 - Extracted raw event data such as function names, gas usage, status flags, block numbers, timestamps, etc.
 - Merged data across wallets into a unified `DataFrame`.
 
 ### Step 2: Feature Engineering
+
+Divided into multiple steps:
+
+1. Transactional-features
+  Selected based on correlation and domain knowledge
+
+2. Aggregate Features
+  Selected using Pearson matrix to find the correlation and dropping columns
+  Dropped some columns based on analysis of values and real-world scope
+
+3. Isolation forest to calculate pseudo-scores
+  Used the scores to further tune columns down to final under 20 columns using xgbregressor for feature_importances_
+
+4. Handpicked 5-6 features
+  The features are shown in the table with description.
+  These columns were used as the input for a linear regression model and the psuedo-risk scores as the label
+  Linear regression coefficients help right the formula for the final risk scores.
 
 Derived behavioral and statistical features for each wallet. Notable examples:
 
@@ -30,7 +49,7 @@ Derived behavioral and statistical features for each wallet. Notable examples:
 | `value_sum` | Total transaction value across all events |
 | `error_rate`, `fail_rate` | Fraction of failed/errored transactions |
 
-In total, ~25 features were generated per wallet.
+In total, ~25 features were generated per wallet before xgb-pruning
 
 ### Step 3: Risk Score Modeling (Unsupervised)
 
@@ -70,6 +89,8 @@ final_risk_score = (
     - 1.15 * fn_entropy
     + 1.2 * fncount_borrow_ratio
 )
+Post scoring, the values would have to be scaled in the range 0-1000, easily achievable by using minmaxscaler.
+
 ```
 
 These coefficients were extracted directly from the trained linear model and rounded for simplicity.
